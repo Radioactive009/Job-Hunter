@@ -1,33 +1,46 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
 
-from app.database import engine
+from app.database import get_db
+from app.models.user import User
+from app.schemas.user import UserCreate
 
 
-app = FastAPI(
-    title="AI Job Intelligence Platform",
-    description="Personalized job discovery and recommendation system",
-    version="0.1.0"
-)
+app = FastAPI()
 
 
 @app.get("/")
 def root():
-    return {
-        "message": "AI Job Intelligence Platform is running"
-    }
+    return {"message": "Job Platform API is running"}
 
 
 @app.get("/health")
-def health_check():
+def health_check(db: Session = Depends(get_db)):
     try:
-        with engine.connect():
-            return {
-                "status": "healthy",
-                "database": "connected"
-            }
-    except Exception as e:
+        db.execute("SELECT 1")
+        return {
+            "status": "healthy",
+            "database": "connected"
+        }
+    except Exception:
         return {
             "status": "unhealthy",
-            "database": "disconnected",
-            "error": str(e)
+            "database": "disconnected"
         }
+
+
+@app.post("/users")
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+
+    new_user = User(
+        email=user.email
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {
+        "id": new_user.id,
+        "email": new_user.email
+    }
