@@ -15,13 +15,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: job_platform_pgadmin
 
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@jobplatform.local
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
 
     ports:
@@ -29,7 +28,6 @@ services:
 
     depends_on:
       - db
-
 
 volumes:
   postgres_data:
