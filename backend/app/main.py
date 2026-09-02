@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 
+from app.database import engine
+
+
 app = FastAPI(
     title="AI Job Intelligence Platform",
     description="Personalized job discovery and recommendation system",
@@ -16,6 +19,15 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {
-        "status": "healthy"
-    }
+    try:
+        with engine.connect():
+            return {
+                "status": "healthy",
+                "database": "connected"
+            }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }
